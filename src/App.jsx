@@ -20,7 +20,6 @@ import {
 } from '@chakra-ui/react';
 import Login from './component/Login';
 
-// Rest of the code remains the same...
 
 
 function Header() {
@@ -58,11 +57,23 @@ function ProductCard({ product }) {
 }
 
 function ProductListing() {
-  const products = [
-    { id: 1, title: 'Product 1', price: 10, image: 'https://via.placeholder.com/150' },
-    { id: 2, title: 'Product 2', price: 20, image: 'https://via.placeholder.com/150' },
-    // Add more products here
-  ];
+  const [products, setProduct] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get("https://fakestoreapi.com/products/");
+        setProduct(response.data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, []);
 
   return (
     <Grid templateColumns="repeat(3, 1fr)" gap={6} p="4">
@@ -73,49 +84,6 @@ function ProductListing() {
   );
 }
 
-function ProductDetails({ productId }) {
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(`https://fakestoreapi.com/products/${productId}`);
-        setProduct(response.data);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [productId]);
-
-  if (isLoading) {
-    return <Spinner size="xl" />;
-  }
-
-  if (!product) {
-    return <Box>No product found</Box>;
-  }
-
-  return (
-    <Box p="4">
-      <Image src={product.image} alt={product.title} />
-      <Heading as="h2" size="lg" mt="4">
-        {product.title}
-      </Heading>
-      <Text fontSize="lg" mt="2">
-        ${product.price}
-      </Text>
-      <Text mt="4">{product.description}</Text>
-      <Button colorScheme="blue" mt="4">
-        Add to Cart
-      </Button>
-    </Box>
-  );
-}
 
 function CartDrawer({ isOpen, onClose }) {
   const cartItems = []; // Fetch cart items here
@@ -164,8 +132,8 @@ function App() {
       <Header />
       {/* Uncomment the component you want to render */}
       <ProductListing />
-      <ProductDetails productId={1} /> {/* Pass productId as a prop */}
-      <Login /> {/* Uncomment Login component */}
+      {/* <ProductDetails productId={1} /> Pass productId as a prop */}
+      {/* <Login /> Uncomment Login component */}
       <CartDrawer isOpen={false} onClose={() => { }} />
       <Checkout />
     </ChakraProvider>
